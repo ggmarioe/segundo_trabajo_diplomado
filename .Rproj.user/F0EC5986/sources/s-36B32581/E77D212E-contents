@@ -1,0 +1,47 @@
+---
+title: "Trabajo de regresión logística"
+author: "Pablo Opazo - Mario Guajardo"
+date: "8/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(skimr)
+library(dplyr)
+library(ggplot2)
+library(MLmetrics)
+library(InformationValue)
+
+
+
+```
+
+## Carga, limpieza y formato de los datos
+
+### a.- Cargue los datos en R y revise los formatos de cada variable, recuerde codificar las variables como numéricas o factores según corresponda.
+```{r 1_a}
+
+rrhh_data <- read.csv("datos/rrhh.csv")
+head(rrhh_data)
+
+
+```
+
+## Análisis descriptivo y exploratorio de datos
+### Realice un análisis descriptivo de sus datos. Determinar si existen observaciones faltantes, en el caso de existir tome la decisión de omitirlas del estudio u omitir la variable. Evalúe si existen posibles incongruencias en la fuente de datos (ej: edades negativas). Y finalmente análice la presencia de valores atípicos en las variables. 
+```{r 2_a}
+skimr::skim(rrhh_data)
+```
+
+### Realice análisis de cómo se relacionan las variables continuas con la variable de interés. Acompañe con gráficos y estadísticas. ¿Qué variables pudieran resultar significativas a la hora de modelar la probabilidad de que el trabajador sea desvinculado a la empresa?
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+glm(rrhh_data$Estado ~ ., data, family = binomial(link = “logit”))
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
