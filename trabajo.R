@@ -14,7 +14,6 @@ rh_data <- rename(rh_data, Dias_Trabajados = Dias.trabajados)
 rh_data <- rename(rh_data, Desempenio = Desempeño)
 janitor::clean_names(rh_data)
 
-# rh_data$Sexo <- ifelse(rh_data$Sexo == "Male",1,0)
 rh_data <- rh_data %>% mutate(Departamento = as.factor(Departamento),
                               Posicion = as.factor(Posicion),
                               Estado_Civil = as.factor(Estado_Civil),
@@ -98,7 +97,7 @@ ggplot(data = rh_data, aes(x=Estado , y=Desempenio )) +
 
  ## Modelamiento
 
-# e 
+# E 
 # Realice una separación de la base de datos en un set de entrenamiento y set 
 # de validación, utilice una proporción de 75:25 respectivamente. Para poder 
 # replicar sus resultados, fije una semilla antes de obtener los indices. 
@@ -112,7 +111,7 @@ sampling <- sample(seq_len(nrow(rh_data)), size = tamano)
 modelo_train <- rh_data %>% slice(sampling) #data de entrenamiento
 modelo_test <- rh_data %>% slice(-sampling) #data de validación
 
-#f 
+#F 
 # Con los datos de entrenamiento ajuste un modelo de regresión logística para
 # estudiar la probabilidad de que el trabajador sea desvinculado de la empresa. 
 # Para ello, utilice las variables edad y desempeño.
@@ -129,7 +128,7 @@ broom::tidy(modelo_desvinculacion) %>% mutate(OR  = exp(estimate))
 
 
 
- h
+# h
 # Utilizando un método automatizado, encuentre el modelo óptimo usando como 
 # criterio el criterio de información de Akaike (AIC). La función step() 
 # puede ser de utilidad.

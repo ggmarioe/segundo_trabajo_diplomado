@@ -1,30 +1,40 @@
 ---
-title: "Trabajo de regresión logística"
+title: "Trabajo de regresión logÃ­stica"
 author: "Pablo Opazo - Mario Guajardo"
 date: "8/17/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(skimr)
 library(dplyr)
+library(janitor)
 library(ggplot2)
-library(MLmetrics)
-library(InformationValue)
-
-
+library(broom)
+library(ROCit)
 
 ```
 
 ## Carga, limpieza y formato de los datos
 
-### a.- Cargue los datos en R y revise los formatos de cada variable, recuerde codificar las variables como numéricas o factores según corresponda.
+### A.- Cargue los datos en R y revise los formatos de cada variable, recuerde codificar las variables como numé ricas o factores según corresponda.
 ```{r 1_a}
 
-rrhh_data <- read.csv("datos/rrhh.csv")
-head(rrhh_data)
+rh_data <- read.csv("datos/rrhh.csv", encoding = "UTF-8")
+
+rh_data <- rename(rh_data, Ratio_Pago = Ratio.Pago)
+rh_data <- rename(rh_data, Estado_Civil = Estado.Civil)
+rh_data <- rename(rh_data, Dias_Trabajados = Dias.trabajados)
+rh_data <- rename(rh_data, Desempenio = Desempeño)
+#janitor::clean_names(rh_data)
+
+rh_data <- rh_data %>% mutate(Departamento = as.factor(Departamento),
+                              Posicion = as.factor(Posicion),
+                              Estado_Civil = as.factor(Estado_Civil),
+                              Desempenio = as.factor(Desempenio))
 
 
 ```
@@ -32,16 +42,167 @@ head(rrhh_data)
 ## Análisis descriptivo y exploratorio de datos
 ### Realice un análisis descriptivo de sus datos. Determinar si existen observaciones faltantes, en el caso de existir tome la decisión de omitirlas del estudio u omitir la variable. Evalúe si existen posibles incongruencias en la fuente de datos (ej: edades negativas). Y finalmente análice la presencia de valores atípicos en las variables. 
 ```{r 2_a}
-skimr::skim(rrhh_data)
+skimr::skim(rh_data)
 ```
+> Se comprueba que los datos están Ok, no presentan datos nulos por lo que se podrá trabajar directamente con ellos
+
+```{r b_2}
+str(rh_data)
+```
+> Comprobación de datos, se registra que no existen datos anómalos
+
+```{r b_3}
+str(rh_data)
+```
+
+__Respuesta:__
+
+    Revisión de medianas, medias, valores mínimos y máximos de variables númericas.
+    Revisión de frecuencias en las variables categóricas. 
+    * La variable Estado corresponde a los valores esperados 0 y 1 
+    * La variables númericas son coherentes, no se observan valores mínimos y máximos imposibles
+    * Revisando la frecuencias de las variables categoricas no se observan categorias ingresadas de mandera repetida ni mal escritas.
+
+---
 
 ### Realice análisis de cómo se relacionan las variables continuas con la variable de interés. Acompañe con gráficos y estadísticas. ¿Qué variables pudieran resultar significativas a la hora de modelar la probabilidad de que el trabajador sea desvinculado a la empresa?
 
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-glm(rrhh_data$Estado ~ ., data, family = binomial(link = “logit”))
+```{r C}
+ggplot(data= rh_data, aes(x=Sexo))+geom_bar(fill="orangered1")+
+theme_minimal()
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#b.3) Detección de Outliers para variables númericas continuas
+
+```{r C_1}
+#Edad
+ggplot(data= rh_data, aes(x= "",y= Edad)) + geom_boxplot(color="black",fill= "lightgreen") + 
+theme_minimal()
+boxplot.stats(rh_data$Edad)$out
+
+#Ratio de Pago
+ggplot(data= rh_data, aes(x= "", y=Ratio_Pago))+geom_boxplot(color="black",fill= "lightgreen") + 
+theme_minimal()
+boxplot.stats(rh_data$Ratio_Pago)$out
+
+#Salario
+ggplot(data= rh_data, aes(x= "",y= Salario)) + geom_boxplot(color="black",fill= "lightgreen") + 
+theme_minimal()
+boxplot.stats(rh_data$Salario)$out
+
+#Dias Trabajados
+ggplot(data= rh_data, aes(x= "",y= Dias_Trabajados)) + geom_boxplot(color="black",fill= "lightgreen") + 
+theme_minimal()
+boxplot.stats(rh_data$Dias_Trabajados)$out
+
+#Ausencias
+ggplot(data= rh_data, aes(x= "",y= Ausencias)) + geom_boxplot(color="black",fill= "lightgreen") + 
+theme_minimal()
+boxplot.stats(rh_data$Ausencias)$out
+```
+
+_Respuesta:_
+
+    Si bien las variables de "Dias Trabajados", "Salario" y "edad", poseen datos outlier estos no son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontratdos.
+
+# E.-
+# Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los indices. Para ello, utilice la función set.seed(2021).
+```{r e1}
+set.seed(2021)
+tamano <- floor(0.75 * nrow(rh_data))
+#listado de muestras a tomar
+sampling <- sample(seq_len(nrow(rh_data)), size = tamano)
+modelo_train <- rh_data %>% slice(sampling) #data de entrenamiento
+modelo_test <- rh_data %>% slice(-sampling) #data de validación
+```
+
+
+# F) Con los datos de entrenamiento ajuste un modelo de regresión logística para estudiar la probabilidad de que el trabajador sea desvinculado de la empresa. Para ello, utilice las variables edad y desempeño.
+
+```{r F1}
+modelo_desvinculacion <- glm(Estado ~ Edad + Desempenio, 
+                             data = modelo_train,
+                             family = binomial(link = "logit"))
+summary(modelo_desvinculacion)
+```
+
+# G) Calcule e interprete los OR correspondientes al modelo, 
+# ¿son estos factores protectores o agravantes de la desvinculación del trabajador?
+```{r g1}
+broom::tidy(modelo_desvinculacion) %>% mutate(OR  = exp(estimate))
+```
+
+__Respuesta:__
+
+    Edad ~ A medida que aumenta la edad promedio del trabajador, mayor probabilidad de que este sea desvinculado.(aumento del 5%)
+    
+    DesempenioExceeds ~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioExceeds" respecto del desempeño de tipo "90-day meets" (Disminuye 75%)
+
+    DesempenioExceptional~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioExceptional" respecto del desempeño de tipo "90-day meets" (Disminuye 99.99%)
+
+    DesempenioFully Meets~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioFully Meets" respecto del desempeño de tipo "90-day meets" (Disminuye 54.4%)
+
+    DesempenioN/A- too early to review~ La probabilidad de desvinculación de un trabajador es mayor si su desempeño es de tipo "DesempenioN/A- too early to review" respecto del desempeño de tipo "90-day meets"  (Aumenta en 49%)
+
+    DesempenioNeeds Improvement~ La probabilidad de desvinculación de un cliente es menor si su desempeño es de tipo "DesempenioNeeds Improvement" respecto del desempeño de tipo "90-day meets" (Disminuye 20.3%)
+
+    DesempenioPIP ~ La probabilidad de desvinculación de un cliente es menor si su desempeño es de tipo "DesempenioPIP " respecto del desempeño de tipo "90-day meets" (Disminuye en 33.9%)
+    
+    
+# H) Utilizando un método automatizado, encuentre el modelo óptimo usando como criterio el criterio de información de Akaike (AIC). La función step()  puede ser de utilidad.
+```{r H1}
+modelo_nulo <- glm(Estado ~ 1, data = rh_data, family = binomial(link = 'logit'))
+modelo_full <- glm(Estado ~ ., data = rh_data, family = binomial(link = 'logit'))
+modelo_final <- step(object = modelo_nulo, direction = 'forward', 
+                           scope= list(upper = modelo_full,
+                                       lower = modelo_nulo),
+                         trace = T)
+formula(modelo_final)
+summary(modelo_final)
+AIC(modelo_nulo, modelo_final)
+```
+
+
+# I) Si usted trabaja en la empresa ABAC, calcule su probabilidad de ser desvinculado. 
+# Suponga que sus características son:
+
+* Edad: Edad del trabajador en años.
+* Ratio.Pago: Medida de pago por hora (numerico)
+* Salario: Salario mensual en dólares que tiene o tenía el trabajador
+* Dias.trabajados: Días que lleva o llevaba trabajando en la empresa
+* Ausencias: Días que ha faltado a trabajar
+* Sexo: Sexo del trabajador (Female , Male)
+* Estado.Civil: Estado civil del trabajador (1: divorciado, 2: casado,3: separado, 4: soltero, 5: viuda)
+* Departamento: Lugar de trabajo en la empresa (Admin Offices,..)
+* Posicion: Cargo del trabajador/empleado (Accountant I ,…. )
+* Desempeño: Clasificación del desempeño del trabajador.
+
+```{r i1}
+new_data <- data.frame(
+  Edad = 34,
+  Ratio.Pago= 34.95,
+  Salario = 3345.2,
+  Dias_Trabajados = 3247,
+  Ausencias = 16,
+  Sexo = "Female",
+  Estado_Civil = 2,
+  Departamento= "Admin Offices",
+  Posicion= "Sr. Accountant",
+  Desempeño= "Fully Meets"
+)
+
+probabilidad <- predict.glm(modelo_final, newdata = new_data, type = "response")
+
+resultado_prediccion <- ifelse(probabilidad >=0.5, 0, 1 )
+View(resultado_prediccion)
+
+
+```
+
+
+
+
+
+
+
+
