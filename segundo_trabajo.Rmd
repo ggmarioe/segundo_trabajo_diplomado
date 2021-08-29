@@ -1,12 +1,11 @@
 ---
-title: "Trabajo de regresión logÃ­stica"
+title: "Trabajo de regresión logística"
 author: "Pablo Opazo - Mario Guajardo"
 date: "8/17/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(skimr)
@@ -15,6 +14,7 @@ library(janitor)
 library(ggplot2)
 library(broom)
 library(ROCit)
+library(ggpubr)
 
 ```
 
@@ -29,7 +29,7 @@ rh_data <- rename(rh_data, Ratio_Pago = Ratio.Pago)
 rh_data <- rename(rh_data, Estado_Civil = Estado.Civil)
 rh_data <- rename(rh_data, Dias_Trabajados = Dias.trabajados)
 rh_data <- rename(rh_data, Desempenio = Desempeño)
-#janitor::clean_names(rh_data)
+
 
 rh_data <- rh_data %>% mutate(Departamento = as.factor(Departamento),
                               Posicion = as.factor(Posicion),
@@ -44,18 +44,16 @@ rh_data <- rh_data %>% mutate(Departamento = as.factor(Departamento),
 ```{r 2_a}
 skimr::skim(rh_data)
 ```
-> Se comprueba que los datos están Ok, no presentan datos nulos por lo que se podrá trabajar directamente con ellos
-
 ```{r b_2}
 str(rh_data)
 ```
-> Comprobación de datos, se registra que no existen datos anómalos
-
+ __Respuesta__:
+ 
+    Se comprueba que los datos están Ok, no presentan datos nulos por lo que se podrá trabajar directamente con ellos
 ```{r b_3}
-str(rh_data)
+summary(rh_data)
 ```
-
-__Respuesta:__
+__Respuesta__:
 
     Revisión de medianas, medias, valores mínimos y máximos de variables númericas.
     Revisión de frecuencias en las variables categóricas. 
@@ -65,14 +63,7 @@ __Respuesta:__
 
 ---
 
-### Realice análisis de cómo se relacionan las variables continuas con la variable de interés. Acompañe con gráficos y estadísticas. ¿Qué variables pudieran resultar significativas a la hora de modelar la probabilidad de que el trabajador sea desvinculado a la empresa?
-
-```{r C}
-ggplot(data= rh_data, aes(x=Sexo))+geom_bar(fill="orangered1")+
-theme_minimal()
-```
-
-#b.3) Detección de Outliers para variables númericas continuas
+### Detección de Outliers para variables númericas continuas
 
 ```{r C_1}
 #Edad
@@ -101,12 +92,188 @@ theme_minimal()
 boxplot.stats(rh_data$Ausencias)$out
 ```
 
-_Respuesta:_
+__Respuesta:__
 
-    Si bien las variables de "Dias Trabajados", "Salario" y "edad", poseen datos outlier estos no son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontratdos.
+    Si bien las variables de "Dias Trabajados", "Salario" y "Edad", poseen datos outlier estos son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontratdos.
+    
+---
 
-# E.-
-# Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los indices. Para ello, utilice la función set.seed(2021).
+### C) Realice análisis de cómo se relacionan las variables continuas con la variable de interés. Acompañe con gráficos y estadísticas. ¿Qué variables pudieran resultar significativas a la hora de modelar la probabilidad de que el trabajador sea desvinculado a la empresa?
+
+```{r c1}
+
+ggpubr::ggboxplot(rh_data, y ="Edad", x="Estado", fill = "Estado")+  
+  xlab("")+ ylab("Edad")+
+  ggtitle("Estado Actual de Trabajadores de la Empresa según la Edad")+ theme_minimal()
+```
+
+__Respuesta:__
+
+    Se puede apreciar que cuando el valor correspondiente a la edad aumenta, puede encontrarse una mayor probabildad de ser desvinculado.
+
+```{r c2}
+anova(aov(Edad~Estado, data=rh_data)) 
+```
+
+__Respuesta:__
+      
+      La diferencia entre los grupos no seria muy significativa
+
+#### Variable de interés Estado y Ratio_Pago
+```{r c2-1}
+ggpubr::ggboxplot(rh_data, y ="Ratio_Pago", x="Estado", fill = "Estado")+  
+  xlab("")+ ylab("Medida de pago por hora")+
+  ggtitle("Estado Actual de Trabajadores de la Empresa según el Ratio de Pago")+ theme_minimal()
+```
+__Respuesta__ 
+
+    Pareciera que a mayor Ratio de Pago, mas probable es que el trabajador se encuentre   vinculado (0) a la empresa.
+    
+```{r c2-2}
+anova(aov(Ratio_Pago~Estado, data=rh_data)) 
+```
+
+__Respuesta:__
+
+    La diferencia entre los grupos seria muy significativa
+
+
+##### Variable de interés Estado y Salario
+```{r c_3}
+
+ggpubr::ggboxplot(rh_data, y ="Salario", x="Estado", fill = "Estado")+  
+  xlab("")+ ylab("Salario Mensual (USD)")+
+  ggtitle("Estado Actual de Trabajadores de la Empresa según el Salario Mensual")+ theme_minimal()
+```
+__Respuesta:__
+    
+    No pareciera que exista mucha diferencia entre los vinculados y desvinculados según el Salario
+
+```{r c_3_1}
+anova(aov(Salario~Estado, data=rh_data)) 
+```
+__Respuesta:__
+
+    La diferencia entre los grupos No seria significativa
+
+##### Variable de interés Estado y Dias Trabajados
+
+```{r c_4}
+ggpubr::ggboxplot(rh_data, y ="Dias_Trabajados", x="Estado", fill = "Estado")+  
+  xlab("")+ ylab("Días que lleva o llevaba trabajando en la empresa")+
+  ggtitle("Estado Actual de Trabajadores de la Empresa según Días que lleva trabajando")+ 
+  theme_minimal()
+```
+__Respuesta:__
+  
+    Pareciera que a mayor cantidad de días trabajados que lleva un empleado, mas probable es que el trabajador se encuentre vinculado(0) a la empresa.
+
+```{r c_4_1}
+anova(aov(Dias_Trabajados~Estado, data=rh_data)) 
+```
+__Respuesta:__
+
+    La diferencia entre los grupos seria muy significativa
+
+##### Variable de interés Estado y Ausencias
+```{r c_5}
+ggpubr::ggboxplot(rh_data, y ="Ausencias", x="Estado", fill = "Estado")+  
+  xlab("")+ ylab("Días que ha faltado a trabajar")+
+  ggtitle("Estado Actual de Trabajadores de la Empresa según Días que ha faltado")+ 
+  theme_minimal()
+```
+__Respuesta:__
+    
+    No pareciera que exista mucha diferencia entre los vinculados y desvinculados según la cantidad de días que han faltado al Trabajo.
+
+```{r C_5_1}
+anova(aov(Ausencias~Estado, data=rh_data)) 
+```
+__Respuesta:__
+La diferencia entre los grupos No seria muy significativa
+
+---
+
+### D) Como seRelacionan las variables categóricas con la variable de interés
+
+#### Se Realiza un test χ2 de dependencia, ademas de mostrar distribución de las frecuencias con tablas de contingencia. 
+
+#### Variable de interés Estado y Sexo
+````{r d_1}
+prop.table(table(rh_data$Estado, rh_data$Sexo), 2)
+mosaicplot(~Sexo+Estado, data=rh_data, shade=TRUE)
+```
+
+##### Test
+```{r d_1_1}
+chisq.test(rh_data$Sexo, rh_data$Estado)
+```
+__Respuesta:__
+  
+    No existe relacion entre las variables,ya que se acepta la independencia entre ellas. Considerando un 95% de confianza.No se espera que sea una variable significativa.
+
+
+#### Variable de interés Estado y Estado_Civil
+```{r d_2}
+prop.table(table(rh_data$Estado, rh_data$Estado_Civil), 2)
+mosaicplot(~Estado_Civil+Estado, data=rh_data, shade=TRUE)
+```
+
+#####Test
+```{r d_2_1}
+chisq.test(rh_data$Estado_Civil, rh_data$Estado)
+```
+__Respuesta:__
+
+    No existe relacion entre las variables,ya que se acepta la independencia entre ellas. considerando un 95% de confianza. No se espera que sea una variable significativa.
+
+##### Variable de interés Estado y Departamento
+```{r d_3}
+prop.table(table(rh_data$Estado, rh_data$Departamento), 2)
+mosaicplot(~Departamento+Estado, data=rh_data, shade=TRUE)
+```
+#####Test
+```{r d_3_1}
+chisq.test(rh_data$Departamento, rh_data$Estado)
+```
+__Respuesta:__
+
+    Existe relacion entre las variables,ya que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.
+
+##### Variable de interés Estado y Posicion
+
+```{r D_4}
+prop.table(table(rh_data$Estado,rh_data$Posicion), 2)
+mosaicplot(~Posicion+Estado, data=rh_data, shade=TRUE)
+```
+
+##### Test
+```{r D_4_1}
+chisq.test(rh_data$Posicion, rh_data$Estado)
+```
+
+__Respuesta:__
+  
+    Existe relacion entre las variables,ya que se rechaza la independencia entre ellas. considerando un 95% de confianza.Se espera que sea una variable significativa.
+
+#### Variable de interés Estado y Desempeño
+
+```{r D_5}
+prop.table(table(rh_data$Estado,rh_data$Desempenio), 2)
+mosaicplot(~Desempenio+Estado, data=rh_data, shade=TRUE)
+```
+##### Test
+```{r D_5_1}
+chisq.test(rh_data$Desempenio, rh_data$Estado)
+```
+
+__Respuesta:__
+
+    Existe relacion entre las variables,ya que se rechaza la independencia entre ellas considerando un 95% de confianza.Se espera que sea una variable significativa.
+
+---
+
+## E) Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los indices. Para ello, utilice la función set.seed(2021).
 ```{r e1}
 set.seed(2021)
 tamano <- floor(0.75 * nrow(rh_data))
@@ -117,7 +284,7 @@ modelo_test <- rh_data %>% slice(-sampling) #data de validación
 ```
 
 
-# F) Con los datos de entrenamiento ajuste un modelo de regresión logística para estudiar la probabilidad de que el trabajador sea desvinculado de la empresa. Para ello, utilice las variables edad y desempeño.
+## F) Con los datos de entrenamiento ajuste un modelo de regresión logística para estudiar la probabilidad de que el trabajador sea desvinculado de la empresa. Para ello, utilice las variables edad y desempeño.
 
 ```{r F1}
 modelo_desvinculacion <- glm(Estado ~ Edad + Desempenio, 
@@ -126,8 +293,8 @@ modelo_desvinculacion <- glm(Estado ~ Edad + Desempenio,
 summary(modelo_desvinculacion)
 ```
 
-# G) Calcule e interprete los OR correspondientes al modelo, 
-# ¿son estos factores protectores o agravantes de la desvinculación del trabajador?
+##  G) Calcule e interprete los OR correspondientes al modelo, 
+## ¿son estos factores protectores o agravantes de la desvinculación del trabajador?
 ```{r g1}
 broom::tidy(modelo_desvinculacion) %>% mutate(OR  = exp(estimate))
 ```
@@ -157,11 +324,15 @@ modelo_final <- step(object = modelo_nulo, direction = 'forward',
                            scope= list(upper = modelo_full,
                                        lower = modelo_nulo),
                          trace = T)
+
 formula(modelo_final)
 summary(modelo_final)
 AIC(modelo_nulo, modelo_final)
 ```
+__Respuesta:__
 
+    Al utilizar la función step, encontramos que utilizando la direcciòn "forward" encontramos el modelo que tiene el menor indice de AIC con un 307.51. 
+    Este corresponde a la fórmula "Estado ~ Dias_Trabajados + Departamento + Edad"
 
 # I) Si usted trabaja en la empresa ABAC, calcule su probabilidad de ser desvinculado. 
 # Suponga que sus características son:
@@ -192,12 +363,99 @@ new_data <- data.frame(
 )
 
 probabilidad <- predict.glm(modelo_final, newdata = new_data, type = "response")
+probabilidad
+```
+__Respuesta:__
 
-resultado_prediccion <- ifelse(probabilidad >=0.5, 0, 1 )
-View(resultado_prediccion)
+    Según la predicción hecha en base al modelo el trabajador ingresado obtiene como resultado que el trabajador estará desvinculado.
 
+
+# Validación del modelo
+
+## J) Utilizando la base de validación y el modelo obtenido en la pregunta anterior, calcule las probabilidades de que el trabajador sea desvinculado.
+
+```{r J1}
+probabilidad_desvinculación <- predict(modelo_final, newdata = modelo_test, type = "response")
+probabilidad_desvinculación
+```
+
+## K) Identifique el punto de corte que optimice la sensibilidad del modelo, pero que cometa como máximo una tasa de falsos positivos (1 - Especificidad) de a lo más un 25%. Use el argumento returnSensitivityMat = TRUE en la función plotROC(). Y obtenga las matrices de confusión y los indicadores de:
+
+
+```{r K1}
+
+predictedscores <- predict(modelo_final, modelo_test,type="response" ) 
+
+roc <- InformationValue::plotROC(actuals = modelo_test$Estado, 
+               predictedScores = predictedscores,
+               returnSensitivityMat = TRUE)
+
+corte<-min(roc[roc$One_minus_specificity < 0.25, 'Threshold'])
+corte
 
 ```
+__Respuesta:__
+
+    El punto de corte óptimo obtenido es de 0.48
+
+### Matriz de confusión
+```{r K2}
+InformationValue::confusionMatrix(modelo_test$Estado,
+                                  predictedscores,
+                                  corte)
+```
+
+### Sensibilidad del modelo
+```{r K3}
+
+InformationValue::sensitivity(modelo_test$Estado,
+                              predictedscores,
+                              corte)
+```
+
+### Especificidad del modelo
+```{r K4}
+InformationValue::specificity(modelo_test$Estado,
+                              predictedscores,
+                              corte)
+```
+
+### Precisión 
+```{r K5}
+InformationValue::precision(modelo_test$Estado,
+                            predictedscores,
+                            corte)
+```
+
+## L)Evalúe el modelo y concluya. Para ello, obtenga e interprete los siguientes estadísticos:
+* Área bajo la curva ROC
+* Test de Kolmogorov - Smirnov (Hint: utilice la función ks.test(x, y) ).
+* Test de Hosmer - Lemeshow (Hint: utilice la función ResourceSelection::hoslem.test() ).
+
+
+### Área bajo la curva ROC
+```{r L1}
+InformationValue::plotROC(actuals = modelo_test$Estado, 
+                          predictedScores = predictedscores,
+                          returnSensitivityMat = TRUE)
+
+```
+### Test de Kolmogorov - Smirnov (Hint: utilice la función ks.test(x, y) ).
+```{r L2}
+ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
+
+```
+
+### Test de Hosmer - Lemeshow
+```{r L3}
+
+y_real  =modelo_test$Estado
+DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculación , obs = y_real)
+```
+__Respuesta:__
+ H1: Existe una diferencia entre los valores observados y valores pronosticados
+
+
 
 
 

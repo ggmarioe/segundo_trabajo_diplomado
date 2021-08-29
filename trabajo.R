@@ -182,22 +182,23 @@ View(resultado_prediccion)
 # calcule las probabilidades de que el trabajador sea desvinculado.
 
 probabilidad_desvinculación <-  predict.glm(modelo_final,
-                                                  newdata = validation_data,
+                                                  newdata = modelo_test,
                                                   type = "response")
 y_pred <- ifelse(probabilidad_desvinculación >= 0.7, 1 , 0)
 probabilidad_desvinculación
+
 # k
 # Identifique el punto de corte que optimice la sensibilidad del modelo, 
 # pero que cometa como máximo una tasa de falsos positivos (1 - Especificidad) 
 # de a lo más un 25%. Use el argumento returnSensitivityMat = TRUE en la 
 # función plotROC(). Y obtenga las matrices de confusión y los indicadores de:
 
-predictedscores <- plogis(predict(modelo_final, validation_data )) 
+predictedscores <- plogis(predict(modelo_final, modelo_test )) 
 
-corte <- InformationValue::optimalCutoff(validation_data$Estado,
+corte <- InformationValue::optimalCutoff(modelo_test$Estado,
                                        predictedscores)
 
-roc <- InformationValue::plotROC(actuals = validation_data$Estado, 
+roc <- InformationValue::plotROC(actuals = modelo_test$Estado, 
                predictedScores = predictedscores,
                returnSensitivityMat = TRUE)
 roc
@@ -209,33 +210,32 @@ corte_25
 # Evalúe el modelo y concluya. Para ello, obtenga e interprete los siguientes 
 # estadísticos:
 # Área bajo la curva ROC
-InformationValue::plotROC(actuals = validation_data$Estado, 
+InformationValue::plotROC(actuals = modelo_test$Estado, 
                           predictedScores = predictedscores,
                           returnSensitivityMat = TRUE)
 
-InformationValue::confusionMatrix(validation_data$Estado,
+InformationValue::confusionMatrix(modelo_test$Estado,
                                   predictedscores,
                                   corte)
 
-InformationValue::sensitivity(validation_data$Estado,
+InformationValue::sensitivity(modelo_test$Estado,
                               predictedscores,
                               corte)
 
-InformationValue::specificity(validation_data$Estado,
+InformationValue::specificity(modelo_test$Estado,
                               predictedscores,
                               corte)
 
-InformationValue::precision(validation_data$Estado,
+InformationValue::precision(modelo_test$Estado,
                             predictedscores,
                             corte)
 # Test de Kolmogorov - Smirnov (Hint: utilice la función ks.test(x, y) ).
 ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
 
-# install.packages("ResourceSelection")
 library(ResourceSelection)
 # Test de Hosmer - Lemeshow (Hint: utilice la función ResourceSelection::hoslem.test() ).
 y_real  =validation_data$Estado
 DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculación , obs = y_real)
 # H1: Exite una diferencia entre los valores observados y valores pronosticados
 
-MLmetrics::Gini(validation_data$Estado, y_pred)
+MLmetrics::Gini(modelo_test$Estado, y_pred)
