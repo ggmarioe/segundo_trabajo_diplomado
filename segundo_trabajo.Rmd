@@ -55,15 +55,15 @@ summary(rh_data)
 ```
 __Respuesta__:
 
-    Revisión de medianas, medias, valores mínimos y máximos de variables númericas.
+    Revisión de medianas, medias, valores mínimos y máximos de variables numéricas.
     Revisión de frecuencias en las variables categóricas. 
     * La variable Estado corresponde a los valores esperados 0 y 1 
     * La variables númericas son coherentes, no se observan valores mínimos y máximos imposibles
-    * Revisando la frecuencias de las variables categoricas no se observan categorias ingresadas de mandera repetida ni mal escritas.
+    * Revisando la frecuencias de las variables categóricas no se observan categorías ingresadas repetidas ni mal escritas.
 
 ---
 
-### Detección de Outliers para variables númericas continuas
+### Detección de Outliers para variables numéricas continuas
 
 ```{r C_1}
 #Edad
@@ -94,7 +94,7 @@ boxplot.stats(rh_data$Ausencias)$out
 
 __Respuesta:__
 
-    Si bien las variables de "Dias Trabajados", "Salario" y "Edad", poseen datos outlier estos son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontratdos.
+    Si bien las variables de "Dias Trabajados", "Salario" y "Edad", poseen datos outlier estos son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontrados.
     
 ---
 
@@ -156,7 +156,7 @@ __Respuesta:__
 
     La diferencia entre los grupos No seria significativa
 
-##### Variable de interés Estado y Dias Trabajados
+##### Variable de interés Estado y Días Trabajados
 
 ```{r c_4}
 ggpubr::ggboxplot(rh_data, y ="Dias_Trabajados", x="Estado", fill = "Estado")+  
@@ -194,9 +194,9 @@ La diferencia entre los grupos No seria muy significativa
 
 ---
 
-### D) Como seRelacionan las variables categóricas con la variable de interés
+### D) Como se relacionan las variables categóricas con la variable de interés
 
-#### Se Realiza un test χ2 de dependencia, ademas de mostrar distribución de las frecuencias con tablas de contingencia. 
+#### Se Realiza un test χ2 de dependencia, además de mostrar distribución de las frecuencias con tablas de contingencia. 
 
 #### Variable de interés Estado y Sexo
 ````{r d_1}
@@ -211,7 +211,7 @@ chisq.test(rh_data$Sexo, rh_data$Estado)
 ```
 __Respuesta:__
   
-    No existe relacion entre las variables,ya que se acepta la independencia entre ellas. Considerando un 95% de confianza.No se espera que sea una variable significativa.
+    No existe relación entre las variables, ya que se acepta la independencia entre ellas. Considerando un 95% de confianza. No se espera que sea una variable significativa.
 
 
 #### Variable de interés Estado y Estado_Civil
@@ -226,7 +226,7 @@ chisq.test(rh_data$Estado_Civil, rh_data$Estado)
 ```
 __Respuesta:__
 
-    No existe relacion entre las variables,ya que se acepta la independencia entre ellas. considerando un 95% de confianza. No se espera que sea una variable significativa.
+    No existe relación entre las variables, ya que se acepta la independencia entre ellas. considerando un 95% de confianza. No se espera que sea una variable significativa.
 
 ##### Variable de interés Estado y Departamento
 ```{r d_3}
@@ -239,7 +239,7 @@ chisq.test(rh_data$Departamento, rh_data$Estado)
 ```
 __Respuesta:__
 
-    Existe relacion entre las variables,ya que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.
+    Existe relación entre las variables,  que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.
 
 ##### Variable de interés Estado y Posicion
 
@@ -255,7 +255,7 @@ chisq.test(rh_data$Posicion, rh_data$Estado)
 
 __Respuesta:__
   
-    Existe relacion entre las variables,ya que se rechaza la independencia entre ellas. considerando un 95% de confianza.Se espera que sea una variable significativa.
+    Existe relación entre las variables, ya que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.
 
 #### Variable de interés Estado y Desempeño
 
@@ -270,11 +270,11 @@ chisq.test(rh_data$Desempenio, rh_data$Estado)
 
 __Respuesta:__
 
-    Existe relacion entre las variables,ya que se rechaza la independencia entre ellas considerando un 95% de confianza.Se espera que sea una variable significativa.
+    Existe relación entre las variables, ya que se rechaza la independencia entre ellas considerando un 95% de confianza. Se espera que sea una variable significativa.
 
 ---
 
-## E) Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los indices. Para ello, utilice la función set.seed(2021).
+## E) Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los índices. Para ello, utilice la función set.seed(2021).
 ```{r e1}
 set.seed(2021)
 #listado de muestras a tomar
@@ -329,14 +329,14 @@ formula(modelo_backward)
 ```
 __Respuesta:__
 
-    Al utilizar la función step, encontramos que utilizando la direcciòn "backward" encontramos el modelo que tiene el menor indice de AIC con un 225.57. 
+    Al utilizar la función step, encontramos que utilizando la dirección "backward" encontramos el modelo que tiene el menor índice de AIC con un 225.57. 
     Este corresponde a la fórmula "Estado ~ Edad + Ratio_Pago + Dias_Trabajados"
 
 # I) Si usted trabaja en la empresa ABAC, calcule su probabilidad de ser desvinculado. 
 # Suponga que sus características son:
 
 * Edad: Edad del trabajador en años.
-* Ratio.Pago: Medida de pago por hora (numerico)
+* Ratio.Pago: Medida de pago por hora (númerico)
 * Salario: Salario mensual en dólares que tiene o tenía el trabajador
 * Dias.trabajados: Días que lleva o llevaba trabajando en la empresa
 * Ausencias: Días que ha faltado a trabajar
@@ -450,7 +450,8 @@ ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
 DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculacion , obs = modelo_test$Estado)
 ```
 __Respuesta:__
- H1: Existe una diferencia entre los valores observados y valores pronosticados
+    
+    Existe una diferencia entre los valores observados y valores pronosticados
 
 
 

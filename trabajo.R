@@ -235,7 +235,7 @@ ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
 library(ResourceSelection)
 # Test de Hosmer - Lemeshow (Hint: utilice la función ResourceSelection::hoslem.test() ).
 y_real  =validation_data$Estado
-DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculacion , obs = y_real)
+DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculación , obs = y_real)
 # H1: Exite una diferencia entre los valores observados y valores pronosticados
 
 MLmetrics::Gini(modelo_test$Estado, y_pred)
