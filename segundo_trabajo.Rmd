@@ -15,6 +15,7 @@ library(ggplot2)
 library(broom)
 library(ROCit)
 library(ggpubr)
+library(DescTools)
 
 ```
 
@@ -31,12 +32,11 @@ rh_data <- rename(rh_data, Dias_Trabajados = Dias.trabajados)
 rh_data <- rename(rh_data, Desempenio = Desempeño)
 
 
-rh_data <- rh_data %>% mutate(Departamento = as.factor(Departamento),
-                              Posicion = as.factor(Posicion),
+rh_data <- rh_data %>% mutate(Sexo = as.factor(Sexo),
                               Estado_Civil = as.factor(Estado_Civil),
+                              Departamento = as.factor(Departamento),
+                              Posicion = as.factor(Posicion),
                               Desempenio = as.factor(Desempenio))
-
-
 ```
 
 ## Análisis descriptivo y exploratorio de datos
@@ -200,8 +200,9 @@ La diferencia entre los grupos No seria muy significativa
 
 #### Variable de interés Estado y Sexo
 ````{r d_1}
+
 prop.table(table(rh_data$Estado, rh_data$Sexo), 2)
-mosaicplot(~Sexo+Estado, data=rh_data, shade=TRUE)
+mosaicplot(~Sexo+Estado, data=rh_data, main = "Distribución de los datos basados en estado y sexo", shade=F)
 ```
 
 ##### Test
@@ -216,7 +217,7 @@ __Respuesta:__
 #### Variable de interés Estado y Estado_Civil
 ```{r d_2}
 prop.table(table(rh_data$Estado, rh_data$Estado_Civil), 2)
-mosaicplot(~Estado_Civil+Estado, data=rh_data, shade=TRUE)
+mosaicplot(~Estado_Civil+Estado, data=rh_data, main = "Distribución de los datos basados en estado y estado civil", shade=F)
 ```
 
 #####Test
@@ -230,7 +231,7 @@ __Respuesta:__
 ##### Variable de interés Estado y Departamento
 ```{r d_3}
 prop.table(table(rh_data$Estado, rh_data$Departamento), 2)
-mosaicplot(~Departamento+Estado, data=rh_data, shade=TRUE)
+mosaicplot(~Departamento+Estado, data=rh_data,  main = "Distribución de los datos basados en estado y Departamento", shade=F)
 ```
 #####Test
 ```{r d_3_1}
@@ -244,7 +245,7 @@ __Respuesta:__
 
 ```{r D_4}
 prop.table(table(rh_data$Estado,rh_data$Posicion), 2)
-mosaicplot(~Posicion+Estado, data=rh_data, shade=TRUE)
+mosaicplot(~Posicion+Estado, data=rh_data, main = "Distribución de los datos basados en estado y Posición en la empresa", shade=F)
 ```
 
 ##### Test
@@ -260,7 +261,7 @@ __Respuesta:__
 
 ```{r D_5}
 prop.table(table(rh_data$Estado,rh_data$Desempenio), 2)
-mosaicplot(~Desempenio+Estado, data=rh_data, shade=TRUE)
+mosaicplot(~Desempenio+Estado, data=rh_data, main = "Distribución de los datos basados en estado y desempeño", shade=F)
 ```
 ##### Test
 ```{r D_5_1}
@@ -276,9 +277,8 @@ __Respuesta:__
 ## E) Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los indices. Para ello, utilice la función set.seed(2021).
 ```{r e1}
 set.seed(2021)
-tamano <- floor(0.75 * nrow(rh_data))
 #listado de muestras a tomar
-sampling <- sample(seq_len(nrow(rh_data)), size = tamano)
+sampling <- sample(1:nrow(rh_data), size = 0.75*nrow(rh_data), replace = FALSE) 
 modelo_train <- rh_data %>% slice(sampling) #data de entrenamiento
 modelo_test <- rh_data %>% slice(-sampling) #data de validación
 ```
@@ -318,21 +318,19 @@ __Respuesta:__
     
 # H) Utilizando un método automatizado, encuentre el modelo óptimo usando como criterio el criterio de información de Akaike (AIC). La función step()  puede ser de utilidad.
 ```{r H1}
-modelo_nulo <- glm(Estado ~ 1, data = rh_data, family = binomial(link = 'logit'))
-modelo_full <- glm(Estado ~ ., data = rh_data, family = binomial(link = 'logit'))
-modelo_final <- step(object = modelo_nulo, direction = 'forward', 
-                           scope= list(upper = modelo_full,
-                                       lower = modelo_nulo),
-                         trace = T)
+modelo_full <- glm(Estado ~ ., data = modelo_train, family = binomial(link = 'logit'))
+modelo_nulo <- glm(Estado ~ 1, data = modelo_train, family = binomial(link = 'logit'))
+modelo_backward <- step(modelo_full, birection = "backward")
+modelo_final <- modelo_backward
 
-formula(modelo_final)
-summary(modelo_final)
-AIC(modelo_nulo, modelo_final)
+AIC(modelo_backward)
+formula(modelo_backward)
+
 ```
 __Respuesta:__
 
-    Al utilizar la función step, encontramos que utilizando la direcciòn "forward" encontramos el modelo que tiene el menor indice de AIC con un 307.51. 
-    Este corresponde a la fórmula "Estado ~ Dias_Trabajados + Departamento + Edad"
+    Al utilizar la función step, encontramos que utilizando la direcciòn "backward" encontramos el modelo que tiene el menor indice de AIC con un 225.57. 
+    Este corresponde a la fórmula "Estado ~ Edad + Ratio_Pago + Dias_Trabajados"
 
 # I) Si usted trabaja en la empresa ABAC, calcule su probabilidad de ser desvinculado. 
 # Suponga que sus características son:
@@ -351,7 +349,7 @@ __Respuesta:__
 ```{r i1}
 new_data <- data.frame(
   Edad = 34,
-  Ratio.Pago= 34.95,
+  Ratio_Pago= 34.95,
   Salario = 3345.2,
   Dias_Trabajados = 3247,
   Ausencias = 16,
@@ -375,16 +373,15 @@ __Respuesta:__
 ## J) Utilizando la base de validación y el modelo obtenido en la pregunta anterior, calcule las probabilidades de que el trabajador sea desvinculado.
 
 ```{r J1}
-probabilidad_desvinculación <- predict(modelo_final, newdata = modelo_test, type = "response")
-probabilidad_desvinculación
+probabilidad_desvinculacion <- predict.glm(modelo_final, newdata = modelo_test, type = "response")
+probabilidad_desvinculacion
 ```
 
 ## K) Identifique el punto de corte que optimice la sensibilidad del modelo, pero que cometa como máximo una tasa de falsos positivos (1 - Especificidad) de a lo más un 25%. Use el argumento returnSensitivityMat = TRUE en la función plotROC(). Y obtenga las matrices de confusión y los indicadores de:
 
 
 ```{r K1}
-
-predictedscores <- predict(modelo_final, modelo_test,type="response" ) 
+predictedscores <- predict.glm(modelo_final, modelo_test,type="response" ) 
 
 roc <- InformationValue::plotROC(actuals = modelo_test$Estado, 
                predictedScores = predictedscores,
@@ -442,6 +439,7 @@ InformationValue::plotROC(actuals = modelo_test$Estado,
 ```
 ### Test de Kolmogorov - Smirnov (Hint: utilice la función ks.test(x, y) ).
 ```{r L2}
+  
 ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
 
 ```
@@ -449,8 +447,7 @@ ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
 ### Test de Hosmer - Lemeshow
 ```{r L3}
 
-y_real  =modelo_test$Estado
-DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculación , obs = y_real)
+DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculacion , obs = modelo_test$Estado)
 ```
 __Respuesta:__
  H1: Existe una diferencia entre los valores observados y valores pronosticados
