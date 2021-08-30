@@ -438,15 +438,15 @@ rh_data &lt;- rh_data %&gt;% mutate(Sexo = as.factor(Sexo),
 ##  Needs Improvement       : 15  
 ##  PIP                     :  9</code></pre>
 <p><strong>Respuesta</strong>:</p>
-<pre><code>Revisión de medianas, medias, valores mínimos y máximos de variables númericas.
+<pre><code>Revisión de medianas, medias, valores mínimos y máximos de variables numéricas.
 Revisión de frecuencias en las variables categóricas. 
 * La variable Estado corresponde a los valores esperados 0 y 1 
 * La variables númericas son coherentes, no se observan valores mínimos y máximos imposibles
-* Revisando la frecuencias de las variables categoricas no se observan categorias ingresadas de mandera repetida ni mal escritas.</code></pre>
+* Revisando la frecuencias de las variables categóricas no se observan categorías ingresadas repetidas ni mal escritas.</code></pre>
 <hr />
 </div>
-<div id="detección-de-outliers-para-variables-númericas-continuas" class="section level3">
-<h3>Detección de Outliers para variables númericas continuas</h3>
+<div id="detección-de-outliers-para-variables-numéricas-continuas" class="section level3">
+<h3>Detección de Outliers para variables numéricas continuas</h3>
 <pre class="r"><code>#Edad
 ggplot(data= rh_data, aes(x= &quot;&quot;,y= Edad)) + geom_boxplot(color=&quot;black&quot;,fill= &quot;lightgreen&quot;) + 
 theme_minimal()</code></pre>
@@ -482,7 +482,7 @@ theme_minimal()</code></pre>
 <pre class="r"><code>boxplot.stats(rh_data$Ausencias)$out</code></pre>
 <pre><code>## integer(0)</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>Si bien las variables de &quot;Dias Trabajados&quot;, &quot;Salario&quot; y &quot;Edad&quot;, poseen datos outlier estos son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontratdos.</code></pre>
+<pre><code>Si bien las variables de &quot;Dias Trabajados&quot;, &quot;Salario&quot; y &quot;Edad&quot;, poseen datos outlier estos son valores completamente coherentes con el tipo de variable, por lo que no se hace ningún cambio a estos outliers encontrados.</code></pre>
 <hr />
 </div>
 <div id="c-realice-análisis-de-cómo-se-relacionan-las-variables-continuas-con-la-variable-de-interés.-acompañe-con-gráficos-y-estadísticas.-qué-variables-pudieran-resultar-significativas-a-la-hora-de-modelar-la-probabilidad-de-que-el-trabajador-sea-desvinculado-a-la-empresa" class="section level3">
@@ -539,8 +539,8 @@ theme_minimal()</code></pre>
 <p><strong>Respuesta:</strong></p>
 <pre><code>La diferencia entre los grupos No seria significativa</code></pre>
 </div>
-<div id="variable-de-interés-estado-y-dias-trabajados" class="section level5">
-<h5>Variable de interés Estado y Dias Trabajados</h5>
+<div id="variable-de-interés-estado-y-días-trabajados" class="section level5">
+<h5>Variable de interés Estado y Días Trabajados</h5>
 <pre class="r"><code>ggpubr::ggboxplot(rh_data, y =&quot;Dias_Trabajados&quot;, x=&quot;Estado&quot;, fill = &quot;Estado&quot;)+  
   xlab(&quot;&quot;)+ ylab(&quot;Días que lleva o llevaba trabajando en la empresa&quot;)+
   ggtitle(&quot;Estado Actual de Trabajadores de la Empresa según Días que lleva trabajando&quot;)+ 
@@ -579,10 +579,10 @@ theme_minimal()</code></pre>
 </div>
 </div>
 </div>
-<div id="d-como-serelacionan-las-variables-categóricas-con-la-variable-de-interés" class="section level3">
-<h3>D) Como seRelacionan las variables categóricas con la variable de interés</h3>
-<div id="se-realiza-un-test-χ2-de-dependencia-ademas-de-mostrar-distribución-de-las-frecuencias-con-tablas-de-contingencia." class="section level4">
-<h4>Se Realiza un test χ2 de dependencia, ademas de mostrar distribución de las frecuencias con tablas de contingencia.</h4>
+<div id="d-como-se-relacionan-las-variables-categóricas-con-la-variable-de-interés" class="section level3">
+<h3>D) Como se relacionan las variables categóricas con la variable de interés</h3>
+<div id="se-realiza-un-test-χ2-de-dependencia-además-de-mostrar-distribución-de-las-frecuencias-con-tablas-de-contingencia." class="section level4">
+<h4>Se Realiza un test χ2 de dependencia, además de mostrar distribución de las frecuencias con tablas de contingencia.</h4>
 </div>
 <div id="variable-de-interés-estado-y-sexo" class="section level4">
 <h4>Variable de interés Estado y Sexo</h4>
@@ -602,7 +602,7 @@ theme_minimal()</code></pre>
 ## data:  rh_data$Sexo and rh_data$Estado
 ## X-squared = 0.48585, df = 1, p-value = 0.4858</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>No existe relacion entre las variables,ya que se acepta la independencia entre ellas. Considerando un 95% de confianza.No se espera que sea una variable significativa.</code></pre>
+<pre><code>No existe relación entre las variables, ya que se acepta la independencia entre ellas. Considerando un 95% de confianza. No se espera que sea una variable significativa.</code></pre>
 </div>
 </div>
 <div id="variable-de-interés-estado-y-estado_civil" class="section level4">
@@ -624,7 +624,7 @@ theme_minimal()</code></pre>
 ## data:  rh_data$Estado_Civil and rh_data$Estado
 ## X-squared = 8.1386, df = 4, p-value = 0.08663</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>No existe relacion entre las variables,ya que se acepta la independencia entre ellas. considerando un 95% de confianza. No se espera que sea una variable significativa.</code></pre>
+<pre><code>No existe relación entre las variables, ya que se acepta la independencia entre ellas. considerando un 95% de confianza. No se espera que sea una variable significativa.</code></pre>
 <div id="variable-de-interés-estado-y-departamento" class="section level5">
 <h5>Variable de interés Estado y Departamento</h5>
 <pre class="r"><code>prop.table(table(rh_data$Estado, rh_data$Departamento), 2)</code></pre>
@@ -647,7 +647,7 @@ theme_minimal()</code></pre>
 ## data:  rh_data$Departamento and rh_data$Estado
 ## X-squared = 19.007, df = 5, p-value = 0.001917</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>Existe relacion entre las variables,ya que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.</code></pre>
+<pre><code>Existe relación entre las variables,  que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.</code></pre>
 </div>
 <div id="variable-de-interés-estado-y-posicion" class="section level5">
 <h5>Variable de interés Estado y Posicion</h5>
@@ -698,7 +698,7 @@ theme_minimal()</code></pre>
 ## data:  rh_data$Posicion and rh_data$Estado
 ## X-squared = 46.149, df = 27, p-value = 0.01226</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>Existe relacion entre las variables,ya que se rechaza la independencia entre ellas. considerando un 95% de confianza.Se espera que sea una variable significativa.</code></pre>
+<pre><code>Existe relación entre las variables, ya que se rechaza la independencia entre ellas. considerando un 95% de confianza. Se espera que sea una variable significativa.</code></pre>
 </div>
 </div>
 <div id="variable-de-interés-estado-y-desempeño" class="section level4">
@@ -723,13 +723,13 @@ theme_minimal()</code></pre>
 ## data:  rh_data$Desempenio and rh_data$Estado
 ## X-squared = 14.36, df = 6, p-value = 0.02586</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>Existe relacion entre las variables,ya que se rechaza la independencia entre ellas considerando un 95% de confianza.Se espera que sea una variable significativa.</code></pre>
+<pre><code>Existe relación entre las variables, ya que se rechaza la independencia entre ellas considerando un 95% de confianza. Se espera que sea una variable significativa.</code></pre>
 <hr />
 </div>
 </div>
 </div>
-<div id="e-realice-una-separación-de-la-base-de-datos-en-un-set-de-entrenamiento-y-set-de-validación-utilice-una-proporción-de-7525-respectivamente.-para-poder-replicar-sus-resultados-fije-una-semilla-antes-de-obtener-los-indices.-para-ello-utilice-la-función-set.seed2021." class="section level2">
-<h2>E) Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los indices. Para ello, utilice la función set.seed(2021).</h2>
+<div id="e-realice-una-separación-de-la-base-de-datos-en-un-set-de-entrenamiento-y-set-de-validación-utilice-una-proporción-de-7525-respectivamente.-para-poder-replicar-sus-resultados-fije-una-semilla-antes-de-obtener-los-índices.-para-ello-utilice-la-función-set.seed2021." class="section level2">
+<h2>E) Realice una separación de la base de datos en un set de entrenamiento y set de validación, utilice una proporción de 75:25 respectivamente. Para poder replicar sus resultados, fije una semilla antes de obtener los índices. Para ello, utilice la función set.seed(2021).</h2>
 <pre class="r"><code>set.seed(2021)
 #listado de muestras a tomar
 sampling &lt;- sample(1:nrow(rh_data), size = 0.75*nrow(rh_data), replace = FALSE) 
@@ -908,7 +908,7 @@ AIC(modelo_backward)</code></pre>
 <pre class="r"><code>formula(modelo_backward)</code></pre>
 <pre><code>## Estado ~ Edad + Ratio_Pago + Dias_Trabajados</code></pre>
 <p><strong>Respuesta:</strong></p>
-<pre><code>Al utilizar la función step, encontramos que utilizando la direcciòn &quot;backward&quot; encontramos el modelo que tiene el menor indice de AIC con un 225.57. 
+<pre><code>Al utilizar la función step, encontramos que utilizando la dirección &quot;backward&quot; encontramos el modelo que tiene el menor índice de AIC con un 225.57. 
 Este corresponde a la fórmula &quot;Estado ~ Edad + Ratio_Pago + Dias_Trabajados&quot;</code></pre>
 </div>
 <div id="i-si-usted-trabaja-en-la-empresa-abac-calcule-su-probabilidad-de-ser-desvinculado." class="section level1">
@@ -918,7 +918,7 @@ Este corresponde a la fórmula &quot;Estado ~ Edad + Ratio_Pago + Dias_Trabajado
 <h1>Suponga que sus características son:</h1>
 <ul>
 <li>Edad: Edad del trabajador en años.</li>
-<li>Ratio.Pago: Medida de pago por hora (numerico)</li>
+<li>Ratio.Pago: Medida de pago por hora (númerico)</li>
 <li>Salario: Salario mensual en dólares que tiene o tenía el trabajador</li>
 <li>Dias.trabajados: Días que lleva o llevaba trabajando en la empresa</li>
 <li>Ausencias: Días que ha faltado a trabajar</li>
