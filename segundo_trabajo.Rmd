@@ -2,7 +2,9 @@
 title: "Trabajo de regresión logística"
 author: "Pablo Opazo - Mario Guajardo"
 date: "8/17/2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -301,19 +303,19 @@ broom::tidy(modelo_desvinculacion) %>% mutate(OR  = exp(estimate))
 
 __Respuesta:__
 
-    Edad ~ A medida que aumenta la edad promedio del trabajador, mayor probabilidad de que este sea desvinculado.(aumento del 5%)
+    Edad ~ A medida que aumenta la edad promedio del trabajador, mayor probabilidad de que este sea desvinculado. Esta variable es un factor con un OR > 1 por lo tanto definimos esta variable como un factor de riesgo
     
-    DesempenioExceeds ~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioExceeds" respecto del desempeño de tipo "90-day meets" (Disminuye 75%)
+    DesempenioExceeds ~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioExceeds" respecto del desempeño de tipo "90-day meets". Esta variable es un factor con un OR < 1 por lo tanto definimos esta variable como un factor protector
 
-    DesempenioExceptional~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioExceptional" respecto del desempeño de tipo "90-day meets" (Disminuye 99.99%)
+    DesempenioExceptional~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioExceptional" respecto del desempeño de tipo "90-day meets". Esta variable es un factor con un OR < 1 por lo tanto definimos esta variable como un factor protector
 
-    DesempenioFully Meets~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioFully Meets" respecto del desempeño de tipo "90-day meets" (Disminuye 54.4%)
+    DesempenioFully Meets~ La probabilidad de desvinculación de un trabajador es menor si su desempeño es de tipo "DesempenioFully Meets" respecto del desempeño de tipo "90-day meets". Esta variable es un factor con un OR < 1 por lo tanto definimos esta variable como un factor protector
 
-    DesempenioN/A- too early to review~ La probabilidad de desvinculación de un trabajador es mayor si su desempeño es de tipo "DesempenioN/A- too early to review" respecto del desempeño de tipo "90-day meets"  (Aumenta en 49%)
+    DesempenioN/A- too early to review~ La probabilidad de desvinculación de un trabajador es mayor si su desempeño es de tipo "DesempenioN/A- too early to review" respecto del desempeño de tipo "90-day meets". Esta variable es un factor con un OR > 1 por lo tanto definimos esta variable como un factor de riesgo
 
-    DesempenioNeeds Improvement~ La probabilidad de desvinculación de un cliente es menor si su desempeño es de tipo "DesempenioNeeds Improvement" respecto del desempeño de tipo "90-day meets" (Disminuye 20.3%)
+    DesempenioNeeds Improvement~ La probabilidad de desvinculación de un cliente es menor si su desempeño es de tipo "DesempenioNeeds Improvement". Esta variable es un factor con un OR < 1 por lo tanto definimos esta variable como un factor protector
 
-    DesempenioPIP ~ La probabilidad de desvinculación de un cliente es menor si su desempeño es de tipo "DesempenioPIP " respecto del desempeño de tipo "90-day meets" (Disminuye en 33.9%)
+    DesempenioPIP ~ La probabilidad de desvinculación de un cliente es menor si su desempeño es de tipo "DesempenioPIP " respecto del desempeño de tipo "90-day meets". Esta variable es un factor con un OR < 1 por lo tanto definimos esta variable como un factor protector
     
     
 # H) Utilizando un método automatizado, encuentre el modelo óptimo usando como criterio el criterio de información de Akaike (AIC). La función step()  puede ser de utilidad.
@@ -363,10 +365,10 @@ new_data <- data.frame(
 probabilidad <- predict.glm(modelo_final, newdata = new_data, type = "response")
 probabilidad
 ```
+
 __Respuesta:__
 
-    Según la predicción hecha en base al modelo el trabajador ingresado obtiene como resultado que el trabajador estará desvinculado.
-
+    La probabilidad de ser desvinculado es muy cercana a 0 para el trabajador en cuestión
 
 # Validación del modelo
 
@@ -382,7 +384,7 @@ probabilidad_desvinculacion
 
 ```{r K1}
 predictedscores <- predict.glm(modelo_final, modelo_test,type="response" ) 
-
+predictedscores
 roc <- InformationValue::plotROC(actuals = modelo_test$Estado, 
                predictedScores = predictedscores,
                returnSensitivityMat = TRUE)
@@ -393,7 +395,7 @@ corte
 ```
 __Respuesta:__
 
-    El punto de corte óptimo obtenido es de 0.48
+    El punto de corte óptimo obtenido es de 0.5
 
 ### Matriz de confusión
 ```{r K2}
@@ -409,13 +411,20 @@ InformationValue::sensitivity(modelo_test$Estado,
                               predictedscores,
                               corte)
 ```
-
+__Respuesta:__
+  
+    Se presenta una sensibilidad de 0.6875
+    
 ### Especificidad del modelo
 ```{r K4}
 InformationValue::specificity(modelo_test$Estado,
                               predictedscores,
                               corte)
 ```
+__Respuesta:__
+  
+    El modelo presenta una alta especificidad la cual tiene un valor de 0.7826087
+    
 
 ### Precisión 
 ```{r K5}
@@ -423,6 +432,10 @@ InformationValue::precision(modelo_test$Estado,
                             predictedscores,
                             corte)
 ```
+__Respuesta:__
+  
+    El modelo presenta una precisió de 0.6875 
+
 
 ## L)Evalúe el modelo y concluya. Para ello, obtenga e interprete los siguientes estadísticos:
 * Área bajo la curva ROC
@@ -437,16 +450,23 @@ InformationValue::plotROC(actuals = modelo_test$Estado,
                           returnSensitivityMat = TRUE)
 
 ```
+__Respuesta:__ 
+
+    El valor del AUC es 0.7785, lo que corresponde a un buen ajuste
+
 ### Test de Kolmogorov - Smirnov (Hint: utilice la función ks.test(x, y) ).
 ```{r L2}
-  
 ks <- ksplot(rocit(score = predictedscores, class = modelo_test$Estado))
 
+ks$`KS stat`
 ```
+__Respuesta:__
+  
+    El valor es 0.513587, siendo un buen poder predictivo para este modelo
+
 
 ### Test de Hosmer - Lemeshow
 ```{r L3}
-
 DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculacion , obs = modelo_test$Estado)
 ```
 __Respuesta:__
