@@ -233,7 +233,7 @@ __Respuesta:__
 ##### Variable de interés Estado y Departamento
 ```{r d_3}
 prop.table(table(rh_data$Estado, rh_data$Departamento), 2)
-mosaicplot(~Departamento+Estado, data=rh_data,  main = "Distribución de los datos basados en estado y Departamento", shade=F)
+mosaicplot(~Departamento+Estado, data=rh_data,  main = "Distribución de los datos basados en estado y Departamento", shade=F, las = 2)
 ```
 #####Test
 ```{r d_3_1}
@@ -247,7 +247,7 @@ __Respuesta:__
 
 ```{r D_4}
 prop.table(table(rh_data$Estado,rh_data$Posicion), 2)
-mosaicplot(~Posicion+Estado, data=rh_data, main = "Distribución de los datos basados en estado y Posición en la empresa", shade=F)
+mosaicplot(~Posicion+Estado, data=rh_data, main = "Distribución de los datos basados en estado y Posición en la empresa", shade=F, las = 2)
 ```
 
 ##### Test
@@ -263,7 +263,7 @@ __Respuesta:__
 
 ```{r D_5}
 prop.table(table(rh_data$Estado,rh_data$Desempenio), 2)
-mosaicplot(~Desempenio+Estado, data=rh_data, main = "Distribución de los datos basados en estado y desempeño", shade=F)
+mosaicplot(~Desempenio+Estado, data=rh_data, main = "Distribución de los datos basados en estado y desempeño", shade=F, las = 2)
 ```
 ##### Test
 ```{r D_5_1}
@@ -384,7 +384,6 @@ probabilidad_desvinculacion
 
 ```{r K1}
 predictedscores <- predict.glm(modelo_final, modelo_test,type="response" ) 
-predictedscores
 roc <- InformationValue::plotROC(actuals = modelo_test$Estado, 
                predictedScores = predictedscores,
                returnSensitivityMat = TRUE)
