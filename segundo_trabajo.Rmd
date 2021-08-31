@@ -471,7 +471,7 @@ DescTools::HosmerLemeshowTest(fit = probabilidad_desvinculacion , obs = modelo_t
 ```
 __Respuesta:__
     
-    Existe una diferencia entre los valores observados y valores pronosticados
+    Se rechaza la hipótesis nula dado que el valor valor p es < 5%, por ende existe diferencia entre los valores observados y pronosticados.
 
 
 
