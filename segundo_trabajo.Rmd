@@ -5,10 +5,12 @@ date: "8/17/2021"
 output:
   html_document: default
   pdf_document: default
+  
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, out.width="700px", dpi=60)
+
 library(readr)
 library(skimr)
 library(dplyr)
@@ -184,6 +186,7 @@ ggpubr::ggboxplot(rh_data, y ="Ausencias", x="Estado", fill = "Estado")+
   ggtitle("Estado Actual de Trabajadores de la Empresa según Días que ha faltado")+ 
   theme_minimal()
 ```
+
 __Respuesta:__
     
     No pareciera que exista mucha diferencia entre los vinculados y desvinculados según la cantidad de días que han faltado al Trabajo.
@@ -207,7 +210,7 @@ prop.table(table(rh_data$Estado, rh_data$Sexo), 2)
 mosaicplot(~Sexo+Estado, data=rh_data, main = "Distribución de los datos basados en estado y sexo", shade=F)
 ```
 
-##### Test
+
 ```{r d_1_1}
 chisq.test(rh_data$Sexo, rh_data$Estado)
 ```
@@ -222,7 +225,6 @@ prop.table(table(rh_data$Estado, rh_data$Estado_Civil), 2)
 mosaicplot(~Estado_Civil+Estado, data=rh_data, main = "Distribución de los datos basados en estado y estado civil", shade=F)
 ```
 
-#####Test
 ```{r d_2_1}
 chisq.test(rh_data$Estado_Civil, rh_data$Estado)
 ```
@@ -235,7 +237,9 @@ __Respuesta:__
 prop.table(table(rh_data$Estado, rh_data$Departamento), 2)
 mosaicplot(~Departamento+Estado, data=rh_data,  main = "Distribución de los datos basados en estado y Departamento", shade=F, las = 2)
 ```
-#####Test
+
+
+
 ```{r d_3_1}
 chisq.test(rh_data$Departamento, rh_data$Estado)
 ```
@@ -250,7 +254,7 @@ prop.table(table(rh_data$Estado,rh_data$Posicion), 2)
 mosaicplot(~Posicion+Estado, data=rh_data, main = "Distribución de los datos basados en estado y Posición en la empresa", shade=F, las = 2)
 ```
 
-##### Test
+
 ```{r D_4_1}
 chisq.test(rh_data$Posicion, rh_data$Estado)
 ```
@@ -265,7 +269,7 @@ __Respuesta:__
 prop.table(table(rh_data$Estado,rh_data$Desempenio), 2)
 mosaicplot(~Desempenio+Estado, data=rh_data, main = "Distribución de los datos basados en estado y desempeño", shade=F, las = 2)
 ```
-##### Test
+
 ```{r D_5_1}
 chisq.test(rh_data$Desempenio, rh_data$Estado)
 ```
@@ -381,12 +385,20 @@ probabilidad_desvinculacion
 
 ## K) Identifique el punto de corte que optimice la sensibilidad del modelo, pero que cometa como máximo una tasa de falsos positivos (1 - Especificidad) de a lo más un 25%. Use el argumento returnSensitivityMat = TRUE en la función plotROC(). Y obtenga las matrices de confusión y los indicadores de:
 
-
-```{r K1}
+```{r k0, , include=FALSE}
 predictedscores <- predict.glm(modelo_final, modelo_test,type="response" ) 
 roc <- InformationValue::plotROC(actuals = modelo_test$Estado, 
                predictedScores = predictedscores,
                returnSensitivityMat = TRUE)
+
+```
+```{r K1}
+
+# se oculta el comando dado que genera el gráfico que sube el peso al trabajo 
+# este se encuentra incluido como variable segun la siguiente fórmula.
+
+# predictedscores <- predict.glm(modelo_final, modelo_test,type="response" ) 
+# roc <- InformationValue::plotROC(actuals = modelo_test$Estado, predictedScores = predictedscores,           returnSensitivityMat = TRUE)
 
 corte<-min(roc[roc$One_minus_specificity < 0.25, 'Threshold'])
 corte
